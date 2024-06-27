@@ -13,7 +13,7 @@ export class ShoppingCartService {
   async getShoppingCartByUserId(userId: number) {
     return this.shoppingCartRepository.find({
       where: { user: { id: userId } },
-      relations: ['product'],
+      relations: ['products'],
     });
   }
 

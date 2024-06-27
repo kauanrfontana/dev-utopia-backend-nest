@@ -1,7 +1,9 @@
+import { ShoppingCartEntity } from 'src/modules/shopping-cart/entities/shopping-cart.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -45,4 +47,7 @@ export class ProductEntity {
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
+
+  @ManyToOne(() => ShoppingCartEntity, (shoppingCart) => shoppingCart.products)
+  shoppingCart: ShoppingCartEntity;
 }

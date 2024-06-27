@@ -17,7 +17,7 @@ export class ShoppingCartEntity {
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
   user: UserEntity;
 
-  @OneToMany(() => ProductEntity, (product) => product.id, {
+  @OneToMany(() => ProductEntity, (product) => product.shoppingCart, {
     cascade: true,
     onDelete: 'CASCADE',
   })
