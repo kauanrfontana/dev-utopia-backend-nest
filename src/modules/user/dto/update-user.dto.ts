@@ -7,7 +7,7 @@ import {
 } from 'class-validator';
 import { UniqueEmail } from '../validation/uniqueEmail.validator';
 
-export class UpdateUserDTO {
+export class UpdateUserDto {
   @IsNotEmpty({ message: 'O nome não pode ser vazio' })
   name: string;
 

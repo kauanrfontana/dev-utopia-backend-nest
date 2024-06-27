@@ -44,5 +44,5 @@ export class ProductEntity {
   userId: number;
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: string;
+  createdAt: Date;
 }

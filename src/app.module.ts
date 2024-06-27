@@ -1,14 +1,23 @@
-import { Module } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { ProductModule } from './modules/product/product.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { SqlServerConfigService } from './config/sqlserver.config.service';
 import { UserModule } from './modules/user/user.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { RefreshTokenMiddleware } from './middlewares/refresh-token.middleware';
+import { TokenModule } from './modules/token/token.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './modules/auth/guards/jwt.guard';
+import { ShoppingCartModule } from './modules/shopping-cart/shopping-cart.module';
 
 @Module({
   imports: [
-    UserModule,
-    ProductModule,
     TypeOrmModule.forRootAsync({
       useClass: SqlServerConfigService,
       inject: [SqlServerConfigService],
@@ -16,8 +25,28 @@ import { UserModule } from './modules/user/user.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    UserModule,
+    ProductModule,
+    AuthModule,
+    TokenModule,
+    ShoppingCartModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(RefreshTokenMiddleware)
+      .exclude(
+        { path: 'login', method: RequestMethod.ALL },
+        { path: 'users', method: RequestMethod.POST },
+      )
+      .forRoutes('*');
+  }
+}

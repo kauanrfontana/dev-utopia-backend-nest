@@ -1,4 +1,12 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { RoleEntity } from './role.entity';
 
 @Entity('users')
 export class UserEntity {
@@ -76,4 +84,11 @@ export class UserEntity {
     },
   })
   zipCode: string;
+
+  @ManyToOne(() => RoleEntity, (role) => role.users)
+  @JoinColumn({ name: 'role_id', referencedColumnName: 'id' })
+  role: RoleEntity;
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 }
