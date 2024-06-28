@@ -15,7 +15,6 @@ import {
   Put,
   Req,
 } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
 import { JwtPayload } from '../shared/interfaces/jwtPayload.interface';
 
 @Controller('/users')
@@ -50,13 +49,8 @@ export class UserController {
   }
 
   @Post()
-  async createUser(@Body() user: CreateUserDto) {
-    const userEntity = new UserEntity();
-    userEntity.name = user.name;
-    userEntity.email = user.email;
-    userEntity.password = await bcrypt.hash(user.password, 10);
-    userEntity.createdAt = new Date();
-    await this.userService.createUser(userEntity);
+  async createUser(@Body() createUserDto: CreateUserDto) {
+    await this.userService.createUser(createUserDto);
     return {
       message: 'Success! User created!',
     };
@@ -65,12 +59,12 @@ export class UserController {
   @Put(':id')
   async updateUser(
     @Param('id', ParseIntPipe) id: number,
-    @Body() user: UpdateUserDto,
+    @Body() updateUserDto: UpdateUserDto,
   ) {
     const userEntity = new UserEntity();
-    userEntity.name = user.name;
-    userEntity.email = user.email;
-    Object.entries(user).forEach(([key, value]) => {
+    userEntity.name = updateUserDto.name;
+    userEntity.email = updateUserDto.email;
+    Object.entries(updateUserDto).forEach(([key, value]) => {
       if (key == 'id') return;
       userEntity[key] = value;
     });

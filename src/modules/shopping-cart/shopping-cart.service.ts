@@ -13,7 +13,7 @@ export class ShoppingCartService {
   async getShoppingCartByUserId(userId: number) {
     return this.shoppingCartRepository.find({
       where: { user: { id: userId } },
-      relations: ['products'],
+      relations: ['user', 'products'],
     });
   }
 
@@ -27,7 +27,7 @@ export class ShoppingCartService {
   async removeProductFromShoppingCart(userId: number, productId: number) {
     return this.shoppingCartRepository.delete({
       user: { id: userId },
-      products: { id: productId },
+      products: [{ id: productId }],
     });
   }
 }

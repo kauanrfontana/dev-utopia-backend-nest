@@ -4,12 +4,16 @@ import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { ListUserDto } from './dto/list-user.dto';
 import { plainToInstance } from 'class-transformer';
+import { CreateUserDto } from './dto/create-user.dto';
+import { RoleService } from '../role/role.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    private roleService: RoleService,
   ) {}
 
   async getUsers(): Promise<ListUserDto[]> {
@@ -43,8 +47,14 @@ export class UserService {
     return this.userRepository.findOne({ where: { email } });
   }
 
-  async createUser(userEntity: UserEntity): Promise<void> {
+  async createUser(createUserDto: CreateUserDto): Promise<void> {
     try {
+      const userEntity = new UserEntity();
+      userEntity.name = createUserDto.name;
+      userEntity.email = createUserDto.email;
+      userEntity.password = await bcrypt.hash(createUserDto.password, 10);
+      userEntity.createdAt = new Date();
+      userEntity.role = await this.roleService.getRoleByCategory(1);
       await this.userRepository.save(userEntity);
     } catch (error) {
       throw new InternalServerErrorException(

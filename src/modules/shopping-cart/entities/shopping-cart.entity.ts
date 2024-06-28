@@ -21,6 +21,5 @@ export class ShoppingCartEntity {
     cascade: true,
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'product_id', referencedColumnName: 'id' })
   products: ProductEntity[];
 }

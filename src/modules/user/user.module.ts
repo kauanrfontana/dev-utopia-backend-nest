@@ -4,10 +4,10 @@ import { UserController } from './user.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
 import { UniqueEmailValidator } from './validation/uniqueEmail.validator';
-import { RoleEntity } from './entities/role.entity';
+import { RoleModule } from '../role/role.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity, RoleEntity])],
+  imports: [TypeOrmModule.forFeature([UserEntity]), RoleModule],
   controllers: [UserController],
   providers: [UserService, UniqueEmailValidator],
   exports: [UserService, TypeOrmModule],

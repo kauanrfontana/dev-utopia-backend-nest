@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -49,5 +50,6 @@ export class ProductEntity {
   createdAt: Date;
 
   @ManyToOne(() => ShoppingCartEntity, (shoppingCart) => shoppingCart.products)
+  @JoinColumn({ name: 'shopping_cart_id', referencedColumnName: 'id' })
   shoppingCart: ShoppingCartEntity;
 }
