@@ -10,7 +10,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { JwtPayload } from '../shared/interfaces/jwtPayload.interface';
+import { JwtPayload } from '../shared/interfaces/jwt-payload.interface';
 
 @Controller('/shopping-carts')
 export class ShoppingCartController {
@@ -25,19 +25,16 @@ export class ShoppingCartController {
     return { data: shoppingCart };
   }
 
-  @Post()
+  @Post('add-product')
   async addProductToShoppingCart(
     @Req() req: Request,
     @Body('productId', ParseIntPipe) productId: number,
   ) {
     const user = req.user as JwtPayload;
-    await this.shoppingCartService.addProductToShoppingCart(
+    return this.shoppingCartService.addProductToShoppingCart(
       user.sub,
       productId,
     );
-    return {
-      message: 'Product added to shopping cart',
-    };
   }
 
   @Delete(':id')
@@ -46,12 +43,9 @@ export class ShoppingCartController {
     @Param('id', ParseIntPipe) productId: number,
   ) {
     const user = req.user as JwtPayload;
-    await this.shoppingCartService.removeProductFromShoppingCart(
+    return this.shoppingCartService.removeProductFromShoppingCart(
       user.sub,
       productId,
     );
-    return {
-      message: 'Product removed from shopping cart',
-    };
   }
 }

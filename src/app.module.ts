@@ -16,6 +16,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './modules/auth/guards/jwt.guard';
 import { ShoppingCartModule } from './modules/shopping-cart/shopping-cart.module';
 import { RoleModule } from './modules/role/role.module';
+import { LocationModule } from './modules/location/location.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { RoleModule } from './modules/role/role.module';
     TokenModule,
     ShoppingCartModule,
     RoleModule,
+    LocationModule,
   ],
   controllers: [],
   providers: [

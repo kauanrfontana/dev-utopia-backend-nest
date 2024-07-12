@@ -3,7 +3,8 @@ import { UserEntity } from 'src/modules/user/entities/user.entity';
 import {
   Entity,
   JoinColumn,
-  OneToMany,
+  JoinTable,
+  ManyToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -17,9 +18,17 @@ export class ShoppingCartEntity {
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
   user: UserEntity;
 
-  @OneToMany(() => ProductEntity, (product) => product.shoppingCart, {
-    cascade: true,
-    onDelete: 'CASCADE',
+  @ManyToMany(() => ProductEntity, (product) => product.shoppingCarts)
+  @JoinTable({
+    name: 'shopping_cart_products',
+    joinColumn: {
+      name: 'shopping_cart_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'product_id',
+      referencedColumnName: 'id',
+    },
   })
   products: ProductEntity[];
 }

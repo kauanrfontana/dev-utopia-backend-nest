@@ -1,59 +1,50 @@
+import { Request } from 'express';
 import { ProductService } from './product.service';
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param, Query, Req } from '@nestjs/common';
+import { JwtPayload } from '../shared/interfaces/jwt-payload.interface';
 
 @Controller('/products')
 export class ProductController {
   constructor(private productService: ProductService) {}
   @Get()
-  async getProducts() {
-    return this.productService.getProducts();
-  }
-  //   @Post()
-  /*  async createProduct(@Body() product: CreateProductDTO) {
-    const productEntity = new ProductEntity();
-    productEntity.id = uuid();
-    productEntity.userId = product.userId;
-    productEntity.name = product.name;
-    productEntity.price = product.price;
-    productEntity.quantity = product.quantity;
-    productEntity.description = product.description;
-    productEntity.category = product.category;
-    productEntity.caracteristics = product.caracteristics;
-    productEntity.images = product.images;
-    this.productService.createProduct(productEntity);
-
-    return {
-      product: productEntity,
-      message: 'Success! Product created!',
-    };
-  }
-
-  @Get()
-  async getProducts(): Promise<ListProductDTO[]> {
-    return this.productService.getProducts();
-  }
-
-  @Patch('/:id')
-  async updateProduct(
-    @Param('id') id: string,
-    @Body() productUpdatedData: UpdateProductDTO,
+  async getAllProducts(
+    @Query('orderColumn') orderColumn: string,
+    @Query('orderType') orderType: 'ASC' | 'DESC',
+    @Query('currentPage') currentPage: number,
+    @Query('itemsPerPage') itemsPerPage: number,
+    @Query('searchText') searchText: string,
   ) {
-    const product = await this.productService.updateProduct(
-      id,
-      productUpdatedData,
+    return this.productService.getAllProducts(
+      currentPage,
+      itemsPerPage,
+      orderColumn,
+      orderType,
+      searchText,
     );
-
-    return {
-      product: product,
-      message: 'Success! Product updated!',
-    };
   }
 
-  @Delete('/:id')
-  async deleteProduct(@Param('id') id: string) {
-    this.productService.deleteProduct(id);
-    return {
-      message: 'Success! Product deleted!',
-    };
-  } */
+  @Get('my')
+  async getMyProducts(
+    @Req() req: Request,
+    @Query('orderColumn') orderColumn: string,
+    @Query('orderType') orderType: 'ASC' | 'DESC',
+    @Query('currentPage') currentPage: number,
+    @Query('itemsPerPage') itemsPerPage: number,
+    @Query('searchText') searchText: string,
+  ) {
+    const userId = (req.user as JwtPayload).sub;
+    return this.productService.getMyProducts(
+      userId,
+      currentPage,
+      itemsPerPage,
+      orderColumn,
+      orderType,
+      searchText,
+    );
+  }
+
+  @Get(':id')
+  async getProductById(@Param('id') id: number) {
+    return this.productService.getProductById(id);
+  }
 }

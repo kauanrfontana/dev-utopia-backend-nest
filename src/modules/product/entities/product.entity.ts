@@ -3,8 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
-  ManyToOne,
+  ManyToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -16,10 +15,26 @@ export class ProductEntity {
   @Column({ name: 'name', length: 200, nullable: false })
   name: string;
 
-  @Column({ name: 'url_image', length: 500, nullable: false })
+  @Column({
+    name: 'url_image',
+    length: 500,
+    nullable: false,
+    transformer: {
+      to: (value: string) => value,
+      from: (value: string | null) => (value === null ? '' : value),
+    },
+  })
   urlImage: string;
 
-  @Column({ name: 'description', length: 400, nullable: false })
+  @Column({
+    name: 'description',
+    length: 400,
+    nullable: false,
+    transformer: {
+      to: (value: string) => value,
+      from: (value: string | null) => (value === null ? '' : value),
+    },
+  })
   description: string;
 
   @Column({ name: 'price', nullable: false })
@@ -31,7 +46,15 @@ export class ProductEntity {
   @Column({ name: 'city_id', nullable: false })
   cityId: number;
 
-  @Column({ name: 'address', length: 200, nullable: false })
+  @Column({
+    name: 'address',
+    length: 200,
+    nullable: false,
+    transformer: {
+      to: (value: string) => value,
+      from: (value: string | null) => (value === null ? '' : value),
+    },
+  })
   address: string;
 
   @Column({ name: 'house_number', nullable: false })
@@ -49,7 +72,6 @@ export class ProductEntity {
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @ManyToOne(() => ShoppingCartEntity, (shoppingCart) => shoppingCart.products)
-  @JoinColumn({ name: 'shopping_cart_id', referencedColumnName: 'id' })
-  shoppingCart: ShoppingCartEntity;
+  @ManyToMany(() => ShoppingCartEntity, (shoppingCart) => shoppingCart.products)
+  shoppingCarts: ShoppingCartEntity[];
 }

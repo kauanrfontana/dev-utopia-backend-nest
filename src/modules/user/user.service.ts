@@ -1,12 +1,22 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Like } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { ListUserDto } from './dto/list-user.dto';
 import { plainToInstance } from 'class-transformer';
 import { CreateUserDto } from './dto/create-user.dto';
 import { RoleService } from '../role/role.service';
 import * as bcrypt from 'bcrypt';
+import { ShoppingCartService } from '../shopping-cart/shopping-cart.service';
+import { IResponseMessage } from '../shared/interfaces/response-message.interface';
+import { IResponseData } from '../shared/interfaces/response-data.interface';
+import { IResponseDataPaginated } from '../shared/interfaces/response-data-paginated.interface';
+import { UpdatePasswordDto } from './dto/update-password.dto';
+import { JwtPayload } from '../shared/interfaces/jwt-payload.interface';
 
 @Injectable()
 export class UserService {
@@ -14,21 +24,34 @@ export class UserService {
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
     private roleService: RoleService,
+    private shoppingCartService: ShoppingCartService,
   ) {}
 
-  async getUsers(): Promise<ListUserDto[]> {
-    const users = await this.userRepository.find({ relations: ['role'] });
+  async getUsers(
+    currentPage: number,
+    itemsPerPage: number,
+    name: string,
+  ): Promise<IResponseDataPaginated<ListUserDto[]>> {
+    const [users, total] = await this.userRepository.findAndCount({
+      skip: (currentPage - 1) * itemsPerPage,
+      take: itemsPerPage,
+      where: {
+        name: Like(`%${name}%`),
+      },
+      relations: ['role'],
+    });
     const flattenedUsers = users.map((user) => ({
       ...user,
       role: user.role.name,
       roleCategory: user.role.category,
     }));
-    return plainToInstance(ListUserDto, flattenedUsers, {
+    const usersListed = plainToInstance(ListUserDto, flattenedUsers, {
       excludeExtraneousValues: true,
     });
+    return { data: usersListed, totalItems: total };
   }
 
-  async getUserById(id: number): Promise<ListUserDto> {
+  async getUserById(id: number): Promise<IResponseData<ListUserDto>> {
     const user = await this.userRepository.findOne({
       where: { id: id },
       relations: ['role'],
@@ -38,16 +61,18 @@ export class UserService {
       role: user.role.name,
       roleCategory: user.role.category,
     };
-    return plainToInstance(ListUserDto, flattenedUser, {
+    const userListed = plainToInstance(ListUserDto, flattenedUser, {
       excludeExtraneousValues: true,
     });
+    return { data: userListed };
   }
 
   async getUserByEmail(email: string): Promise<UserEntity> {
-    return this.userRepository.findOne({ where: { email } });
+    const user = await this.userRepository.findOne({ where: { email } });
+    return user;
   }
 
-  async createUser(createUserDto: CreateUserDto): Promise<void> {
+  async createUser(createUserDto: CreateUserDto): Promise<IResponseMessage> {
     try {
       const userEntity = new UserEntity();
       userEntity.name = createUserDto.name;
@@ -56,6 +81,10 @@ export class UserService {
       userEntity.createdAt = new Date();
       userEntity.role = await this.roleService.getRoleByCategory(1);
       await this.userRepository.save(userEntity);
+      await this.shoppingCartService.createShoppingCart(userEntity.id);
+      return {
+        message: 'Usuário criado com sucesso!',
+      };
     } catch (error) {
       throw new InternalServerErrorException(
         'Não foi possível inserir o usuário no momento. Por favor, tente mais tarde.',
@@ -63,11 +92,57 @@ export class UserService {
     }
   }
 
-  async updateUser(id: number, userEntity: UserEntity): Promise<void> {
+  async updateUser(
+    id: number,
+    userEntity: UserEntity,
+  ): Promise<IResponseMessage> {
     await this.userRepository.update(id, userEntity);
+    return {
+      message: 'Usuário atualizado com sucesso!',
+    };
   }
 
-  async deleteUser(id: number): Promise<void> {
+  async updatePassword(
+    updateUserDto: UpdatePasswordDto,
+    userData: JwtPayload,
+  ): Promise<IResponseMessage> {
+    if (
+      !this.validateUser({
+        email: userData.email,
+        password: updateUserDto.currentPassword,
+      })
+    ) {
+      throw new BadRequestException(
+        'Senha atual informada, não corresponde com a cadastrada em nosso sistema!',
+      );
+    }
+
+    const newPassword = await bcrypt.hash(updateUserDto.newPassword, 10);
+    await this.userRepository.update(userData.sub, { password: newPassword });
+    return {
+      message: 'Senha atualizada com sucesso!',
+    };
+  }
+
+  async deleteUser(id: number): Promise<IResponseMessage> {
     await this.userRepository.delete(id);
+    return {
+      message: 'Usuário deletado com sucesso!',
+    };
+  }
+
+  async validateUser({ email, password }): Promise<UserEntity> {
+    const user = await this.getUserByEmail(email);
+
+    if (!user) {
+      return null;
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      return null;
+    }
+
+    return user;
   }
 }

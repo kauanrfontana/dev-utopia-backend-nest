@@ -2,7 +2,6 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from './../user/user.service';
 import { Injectable } from '@nestjs/common';
 import { AuthDataDto } from './dto/auth.dto';
-import * as bcrypt from 'bcrypt';
 import { UserEntity } from '../user/entities/user.entity';
 import { TokenService } from '../token/tokens.service';
 import { TokenEntity } from '../token/entities/token.entity';
@@ -16,26 +15,8 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  private async validateUser({
-    email,
-    password,
-  }: AuthDataDto): Promise<UserEntity> {
-    const user = await this.userService.getUserByEmail(email);
-
-    if (!user) {
-      return null;
-    }
-
-    const passwordMatch = await bcrypt.compare(password, user.password);
-    if (!passwordMatch) {
-      return null;
-    }
-
-    return user;
-  }
-
   async login(authData: AuthDataDto): Promise<Record<string, string>> {
-    const user = await this.validateUser(authData);
+    const user = await this.userService.validateUser(authData);
     if (!user) return null;
     const { token, refreshToken } = await this.setTokens(user);
 

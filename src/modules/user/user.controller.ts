@@ -13,18 +13,23 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Query,
   Req,
 } from '@nestjs/common';
-import { JwtPayload } from '../shared/interfaces/jwtPayload.interface';
+import { JwtPayload } from '../shared/interfaces/jwt-payload.interface';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 
 @Controller('/users')
 export class UserController {
   constructor(private userService: UserService) {}
 
   @Get()
-  async getUsers() {
-    const users = await this.userService.getUsers();
-    return { data: users };
+  async getUsers(
+    @Query('currentPage') currentPage: number,
+    @Query('itemsPerPage') itemsPerPage: number,
+    @Query('name') name: string,
+  ) {
+    return this.userService.getUsers(currentPage, itemsPerPage, name);
   }
 
   @Get(':id')
@@ -44,16 +49,21 @@ export class UserController {
       const userData = req.user as JwtPayload;
       userId = userData.sub;
     }
-    const user = await this.userService.getUserById(userId);
-    return { data: user };
+    return this.userService.getUserById(userId);
   }
 
   @Post()
   async createUser(@Body() createUserDto: CreateUserDto) {
-    await this.userService.createUser(createUserDto);
-    return {
-      message: 'Success! User created!',
-    };
+    return this.userService.createUser(createUserDto);
+  }
+
+  @Put('password')
+  async updatePassword(
+    @Req() req: Request,
+    @Body() updatePasswordDto: UpdatePasswordDto,
+  ) {
+    const userData = req.user as JwtPayload;
+    return this.userService.updatePassword(updatePasswordDto, userData);
   }
 
   @Put(':id')
@@ -68,18 +78,11 @@ export class UserController {
       if (key == 'id') return;
       userEntity[key] = value;
     });
-    await this.userService.updateUser(id, userEntity);
-
-    return {
-      message: 'Success! User updated!',
-    };
+    return this.userService.updateUser(id, userEntity);
   }
 
-  @Delete('/:id')
+  @Delete(':id')
   async deleteUser(@Param('id', ParseIntPipe) id: number) {
-    await this.userService.deleteUser(id);
-    return {
-      message: 'Success! User deleted!',
-    };
+    return this.userService.deleteUser(id);
   }
 }

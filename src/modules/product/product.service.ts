@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { ProductEntity } from './entities/product.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
+import { ListProductsDto } from './dto/list-products.dto';
+import { IResponseDataPaginated } from '../shared/interfaces/response-data-paginated.interface';
+import { plainToInstance } from 'class-transformer';
+import { IResponseData } from '../shared/interfaces/response-data.interface';
 
 @Injectable()
 export class ProductService {
@@ -10,9 +14,59 @@ export class ProductService {
     private readonly productRepository: Repository<ProductEntity>,
   ) {}
 
-  async getProducts() {
-    const savedProducts = await this.productRepository.find();
+  async getAllProducts(
+    currentPage: number,
+    itemsPerPage: number,
+    orderByColumn: string = 'created_at',
+    orderByType: 'ASC' | 'DESC' = 'DESC',
+    searchText: string,
+  ): Promise<IResponseDataPaginated<ListProductsDto[]>> {
+    const [savedProducts, total] = await this.productRepository.findAndCount({
+      skip: (currentPage - 1) * itemsPerPage,
+      take: itemsPerPage,
+      order: {
+        [orderByColumn]: orderByType,
+      },
+      where: {
+        name: Like(`%${searchText}%`),
+      },
+    });
+    const productsList = plainToInstance(ListProductsDto, savedProducts, {
+      excludeExtraneousValues: true,
+    });
+    return { data: productsList, totalItems: total };
+  }
 
-    return savedProducts;
+  async getMyProducts(
+    userId: number,
+    currentPage: number,
+    itemsPerPage: number,
+    orderByColumn: string = 'created_at',
+    orderByType: 'ASC' | 'DESC' = 'DESC',
+    searchText: string,
+  ): Promise<IResponseDataPaginated<ListProductsDto[]>> {
+    const [savedProducts, total] = await this.productRepository.findAndCount({
+      skip: (currentPage - 1) * itemsPerPage,
+      take: itemsPerPage,
+      order: {
+        [orderByColumn]: orderByType,
+      },
+      where: {
+        name: Like(`%${searchText}%`),
+        userId: userId,
+      },
+    });
+    const productsList = plainToInstance(ListProductsDto, savedProducts, {
+      excludeExtraneousValues: true,
+    });
+    return { data: productsList, totalItems: total };
+  }
+
+  async getProductById(id: number): Promise<IResponseData<ProductEntity>> {
+    const savedProduct = await this.productRepository.findOne({
+      where: { id },
+    });
+
+    return { data: savedProduct };
   }
 }
