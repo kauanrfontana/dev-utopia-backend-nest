@@ -6,6 +6,7 @@ import { ListProductsDto } from './dto/list-products.dto';
 import { IResponseDataPaginated } from '../shared/interfaces/response-data-paginated.interface';
 import { plainToInstance } from 'class-transformer';
 import { IResponseData } from '../shared/interfaces/response-data.interface';
+import { IResponseMessage } from '../shared/interfaces/response-message.interface';
 
 @Injectable()
 export class ProductService {
@@ -68,5 +69,18 @@ export class ProductService {
     });
 
     return { data: savedProduct };
+  }
+
+  async createProduct(productEntity: ProductEntity): Promise<IResponseMessage> {
+    await this.productRepository.save(productEntity);
+    return { message: 'Produto criado com sucesso!' };
+  }
+
+  async updateProduct(
+    productId: number,
+    productEntity: ProductEntity,
+  ): Promise<IResponseMessage> {
+    await this.productRepository.update(productId, productEntity);
+    return { message: 'Produto atualizado com sucesso!' };
   }
 }

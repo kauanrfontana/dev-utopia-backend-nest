@@ -1,7 +1,6 @@
 import { Request } from 'express';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserEntity } from './entities/user.entity';
 import { UserService } from './user.service';
 import {
   BadRequestException,
@@ -71,14 +70,7 @@ export class UserController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    const userEntity = new UserEntity();
-    userEntity.name = updateUserDto.name;
-    userEntity.email = updateUserDto.email;
-    Object.entries(updateUserDto).forEach(([key, value]) => {
-      if (key == 'id') return;
-      userEntity[key] = value;
-    });
-    return this.userService.updateUser(id, userEntity);
+    return this.userService.updateUser(id, updateUserDto);
   }
 
   @Delete(':id')

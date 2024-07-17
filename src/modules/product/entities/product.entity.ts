@@ -58,7 +58,7 @@ export class ProductEntity {
   address: string;
 
   @Column({ name: 'house_number', nullable: false })
-  houseNumber: number;
+  houseNumber: string;
 
   @Column({ name: 'complement', length: 200, nullable: false })
   complement: string;

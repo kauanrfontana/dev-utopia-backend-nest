@@ -17,6 +17,7 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt.guard';
 import { ShoppingCartModule } from './modules/shopping-cart/shopping-cart.module';
 import { RoleModule } from './modules/role/role.module';
 import { LocationModule } from './modules/location/location.module';
+import { PurchasedItemModule } from './modules/purchased-item/purchased-item.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { LocationModule } from './modules/location/location.module';
     ShoppingCartModule,
     RoleModule,
     LocationModule,
+    PurchasedItemModule,
   ],
   controllers: [],
   providers: [

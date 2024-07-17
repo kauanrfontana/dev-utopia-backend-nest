@@ -1,21 +1,9 @@
-import {
-  IsEmail,
-  IsNotEmpty,
-  IsOptional,
-  IsInt,
-  IsString,
-} from 'class-validator';
-import { UniqueEmail } from '../validation/uniqueEmail.validator';
+import { IsNotEmpty, IsOptional, IsInt } from 'class-validator';
 
 export class UpdateUserDto {
   @IsNotEmpty({ message: 'O nome não pode ser vazio' })
   name: string;
 
-  @IsEmail(undefined, { message: 'email informado é inválido' })
-  @UniqueEmail({ message: 'Já existe um usuáro com este e-mail' })
-  email: string;
-
-  @IsString()
   @IsOptional()
   address: string;
 
@@ -27,15 +15,12 @@ export class UpdateUserDto {
   @IsOptional()
   cityId: number;
 
-  @IsInt()
   @IsOptional()
-  houseNumber: number;
+  houseNumber: string;
 
-  @IsString()
   @IsOptional()
   complement: string;
 
-  @IsString()
   @IsOptional()
   zipCode: string;
 }

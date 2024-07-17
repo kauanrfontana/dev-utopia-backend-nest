@@ -17,6 +17,7 @@ import { IResponseData } from '../shared/interfaces/response-data.interface';
 import { IResponseDataPaginated } from '../shared/interfaces/response-data-paginated.interface';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { JwtPayload } from '../shared/interfaces/jwt-payload.interface';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -94,8 +95,22 @@ export class UserService {
 
   async updateUser(
     id: number,
-    userEntity: UserEntity,
+    updateUserDto: UpdateUserDto,
   ): Promise<IResponseMessage> {
+    const userEntity = new UserEntity();
+    userEntity.name = updateUserDto.name;
+
+    userEntity.address = updateUserDto.address;
+
+    userEntity.stateId = updateUserDto.stateId;
+
+    userEntity.cityId = updateUserDto.cityId;
+
+    userEntity.houseNumber = updateUserDto.houseNumber;
+
+    userEntity.complement = updateUserDto.complement;
+
+    userEntity.zipCode = updateUserDto.zipCode;
     await this.userRepository.update(id, userEntity);
     return {
       message: 'Usuário atualizado com sucesso!',

@@ -61,7 +61,7 @@ export class UserEntity {
       from: (value: string | null) => (value === null ? '' : value),
     },
   })
-  houseNumber: number;
+  houseNumber: string;
 
   @Column({
     name: 'complement',
