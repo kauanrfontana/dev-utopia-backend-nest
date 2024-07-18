@@ -22,16 +22,9 @@ export class TokenService {
 
   async verifyRefreshToken(refreshToken: string): Promise<boolean> {
     const refreshTokensActive = await this.tokenRepository.count({
-      where: { refreshToken: refreshToken, active: 1 },
+      where: { refreshToken: refreshToken },
     });
 
     return refreshTokensActive > 0;
-  }
-
-  async deactiveToken(refreshToken: string): Promise<void> {
-    await this.tokenRepository.update(
-      { refreshToken: refreshToken },
-      { active: 0 },
-    );
   }
 }

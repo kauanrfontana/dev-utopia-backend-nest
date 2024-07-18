@@ -63,8 +63,14 @@ export class AuthService {
 
     const tokens = await this.setTokens(user);
 
-    await this.tokenService.deactiveToken(refreshToken);
-
     return tokens;
+  }
+
+  isTokenExpired(token: string): boolean {
+    const tokenDecoded = this.jwtService.decode(token);
+
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    return tokenDecoded.exp < currentTime;
   }
 }
