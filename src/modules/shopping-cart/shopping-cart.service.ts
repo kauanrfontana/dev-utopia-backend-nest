@@ -20,7 +20,6 @@ export class ShoppingCartService {
   ): Promise<IResponseData<ListShoppingCartDto>> {
     const shoppingCartSaved = await this.shoppingCartRepository.findOne({
       where: { user: { id: userId } },
-      relations: ['products'],
     });
     let qtdProducts = 0;
     let totalPrice = 0;
@@ -49,7 +48,6 @@ export class ShoppingCartService {
   ): Promise<IResponseMessage> {
     const shoppingCart = await this.shoppingCartRepository.findOne({
       where: { user: { id: userId } },
-      relations: ['products'],
     });
 
     const productAlreadyInCart = !!shoppingCart.products.find(
@@ -79,7 +77,6 @@ export class ShoppingCartService {
   ): Promise<IResponseMessage> {
     const shoppingCart = await this.shoppingCartRepository.findOne({
       where: { user: { id: userId } },
-      relations: ['products'],
     });
 
     shoppingCart.products = shoppingCart.products.filter(

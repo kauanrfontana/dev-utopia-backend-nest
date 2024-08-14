@@ -14,11 +14,13 @@ export class ShoppingCartEntity {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @OneToOne(() => UserEntity, { onDelete: 'CASCADE' })
+  @OneToOne(() => UserEntity, { onDelete: 'CASCADE', eager: true })
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
   user: UserEntity;
 
-  @ManyToMany(() => ProductEntity, (product) => product.shoppingCarts)
+  @ManyToMany(() => ProductEntity, (product) => product.shoppingCarts, {
+    eager: true,
+  })
   @JoinTable({
     name: 'shopping_cart_products',
     joinColumn: {

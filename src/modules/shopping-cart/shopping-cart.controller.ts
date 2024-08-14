@@ -19,10 +19,7 @@ export class ShoppingCartController {
   @Get()
   async getShoppingCartByUserId(@Req() req: Request) {
     const user = req.user as JwtPayload;
-    const shoppingCart = await this.shoppingCartService.getShoppingCartByUserId(
-      user.sub,
-    );
-    return { data: shoppingCart };
+    return this.shoppingCartService.getShoppingCartByUserId(user.sub);
   }
 
   @Post('add-product')
